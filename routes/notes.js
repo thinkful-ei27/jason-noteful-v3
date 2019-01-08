@@ -1,26 +1,53 @@
 'use strict';
 
 const express = require('express');
-
+const mongoose = require('mongoose');
 const router = express.Router();
+const { MONGODB_URI } = require('../config');
+const Note = require('../models/note');
 
 /* ========== GET/READ ALL ITEMS ========== */
 router.get('/', (req, res, next) => {
-
+  const searchTerm = req.query.searchTerm;
+  let filter = {};
   console.log('Get All Notes');
-  res.json([
-    { id: 1, title: 'Temp 1' },
-    { id: 2, title: 'Temp 2' },
-    { id: 3, title: 'Temp 3' }
-  ]);
+  mongoose.connect(MONGODB_URI, { useNewUrlParser:true })
+  .then(() => {
+    if (searchTerm) {
+      filter.title = { $regex: searchTerm, $options: 'i' };
+    }
+    return Note.find(filter).sort({ updatedAt: 'desc' });
+  })
+  .then(results => {
+    res.json(results);
+  })
+  .then(() => {
+    return mongoose.disconnect()
+  })
+  .catch(err => {
+    console.error(`ERROR: ${err.message}`);
+    console.error(err);
+  });
 
 });
 
 /* ========== GET/READ A SINGLE ITEM ========== */
 router.get('/:id', (req, res, next) => {
-
-  console.log('Get a Note');
-  res.json({ id: 1, title: 'Temp 1' });
+const searchId = req.params.id;
+mongoose.connect(MONGODB_URI, { useNewUrlParser:true })
+.then(() => {
+  return Note.findById(searchId);
+})
+.then(results => {
+  res.json(results);
+})
+.then(() => {
+  return mongoose.disconnect()
+})
+.catch(err => {
+  console.error(`ERROR: ${err.message}`);
+  console.error(err);
+});
 
 });
 
