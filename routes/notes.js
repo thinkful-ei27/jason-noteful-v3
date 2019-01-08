@@ -101,7 +101,23 @@ router.put('/:id', (req, res, next) => {
 router.delete('/:id', (req, res, next) => {
 
   console.log('Delete a Note');
-  res.sendStatus(204);
+  const deleteId = req.params.id;
+
+  // DELETE NOTE BY ID
+  mongoose.connect(MONGODB_URI, { useNewUrlParser:true })
+  .then(() => {
+    return Note.findByIdAndRemove(deleteId);
+  })
+  .then(results => {
+    res.json(results);
+  })
+  .then(() => {
+    return mongoose.disconnect()
+  })
+  .catch(err => {
+    console.error(`ERROR: ${err.message}`);
+    console.error(err);
+  });
 });
 
 module.exports = router;
