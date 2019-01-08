@@ -68,17 +68,36 @@ const Note = require('../models/note');
 
 
 // UPDATE NOTE BY ID
+// mongoose.connect(MONGODB_URI, { useNewUrlParser:true })
+// .then(() => {
+//     const updateId = '5c350c1497232448f3f52617';
+//   const newData = {
+//         title: "marvin",
+//         content: "more marvin, less bob"
+//     };
+
+//   return Note.findByIdAndUpdate(updateId, 
+//     newData,
+//     {upsert: true, new: true});
+// })
+// .then(results => {
+//   console.log(results);
+// })
+// .then(() => {
+//   return mongoose.disconnect()
+// })
+// .catch(err => {
+//   console.error(`ERROR: ${err.message}`);
+//   console.error(err);
+// });
+
+
+// DELETE NOTE BY ID
 mongoose.connect(MONGODB_URI, { useNewUrlParser:true })
 .then(() => {
-    const updateId = '5c350c1497232448f3f52617';
-  const newData = {
-        title: "marvin",
-        content: "more marvin, less bob"
-    };
+    const deleteId = '5c350c16ed5eac48f4f051f3';
 
-  return Note.findByIdAndUpdate(updateId, 
-    newData,
-    {upsert: true, new: true});
+  return Note.findByIdAndRemove(deleteId);
 })
 .then(results => {
   console.log(results);
@@ -90,4 +109,3 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser:true })
   console.error(`ERROR: ${err.message}`);
   console.error(err);
 });
-
