@@ -93,19 +93,19 @@ const Note = require('../models/note');
 
 
 // DELETE NOTE BY ID
-mongoose.connect(MONGODB_URI, { useNewUrlParser:true })
-.then(() => {
-    const deleteId = '5c350c16ed5eac48f4f051f3';
+// mongoose.connect(MONGODB_URI, { useNewUrlParser:true })
+// .then(() => {
+//     const deleteId = '5c350c16ed5eac48f4f051f3';
 
-  return Note.findByIdAndRemove(deleteId);
-})
-.then(results => {
-  console.log(results);
-})
-.then(() => {
-  return mongoose.disconnect()
-})
-.catch(err => {
-  console.error(`ERROR: ${err.message}`);
-  console.error(err);
-});
+//   return Note.findByIdAndRemove(deleteId);
+// })
+// .then(results => {
+//   console.log(results);
+// })
+// .then(() => {
+//   return mongoose.disconnect()
+// })
+// .catch(err => {
+//   console.error(`ERROR: ${err.message}`);
+//   console.error(err);
+// });
