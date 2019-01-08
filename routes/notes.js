@@ -75,10 +75,26 @@ router.post('/', (req, res, next) => {
 
 /* ========== PUT/UPDATE A SINGLE ITEM ========== */
 router.put('/:id', (req, res, next) => {
-
+  const updateId = req.params.id;
+  const newData = req.body;
   console.log('Update a Note');
-  res.json({ id: 1, title: 'Updated Temp 1' });
-
+  // UPDATE NOTE BY ID
+  mongoose.connect(MONGODB_URI, { useNewUrlParser:true })
+  .then(() => {
+    return Note.findByIdAndUpdate(updateId, 
+      newData,
+      {upsert: true, new: true});
+  })
+  .then(results => {
+    res.json(results);
+  })
+  .then(() => {
+    return mongoose.disconnect()
+  })
+  .catch(err => {
+    console.error(`ERROR: ${err.message}`);
+    console.error(err);
+  });
 });
 
 /* ========== DELETE/REMOVE A SINGLE ITEM ========== */
