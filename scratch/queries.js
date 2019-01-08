@@ -46,24 +46,48 @@ const Note = require('../models/note');
 //   });
 
   //CREATE A DOCUMENT
-  mongoose.connect(MONGODB_URI, { useNewUrlParser:true })
-  .then(() => {
-    const newNote = {
-          title: "bob",
-          content: "more bob"
-      };
+//   mongoose.connect(MONGODB_URI, { useNewUrlParser:true })
+//   .then(() => {
+//     const newNote = {
+//           title: "bob",
+//           content: "more bob"
+//       };
 
-    return Note.create(newNote);
-  })
-  .then(results => {
-    console.log(results);
-  })
-  .then(() => {
-    return mongoose.disconnect()
-  })
-  .catch(err => {
-    console.error(`ERROR: ${err.message}`);
-    console.error(err);
-  });
+//     return Note.create(newNote);
+//   })
+//   .then(results => {
+//     console.log(results);
+//   })
+//   .then(() => {
+//     return mongoose.disconnect()
+//   })
+//   .catch(err => {
+//     console.error(`ERROR: ${err.message}`);
+//     console.error(err);
+//   });
 
+
+// UPDATE NOTE BY ID
+mongoose.connect(MONGODB_URI, { useNewUrlParser:true })
+.then(() => {
+    const updateId = '5c350c1497232448f3f52617';
+  const newData = {
+        title: "marvin",
+        content: "more marvin, less bob"
+    };
+
+  return Note.findByIdAndUpdate(updateId, 
+    newData,
+    {upsert: true, new: true});
+})
+.then(results => {
+  console.log(results);
+})
+.then(() => {
+  return mongoose.disconnect()
+})
+.catch(err => {
+  console.error(`ERROR: ${err.message}`);
+  console.error(err);
+});
 
