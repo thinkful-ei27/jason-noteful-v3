@@ -45,7 +45,7 @@ const Note = require('../models/note');
 //     console.error(err);
 //   });
 
-  //CREATE A DOCUMENT
+//   CREATE A DOCUMENT
 //   mongoose.connect(MONGODB_URI, { useNewUrlParser:true })
 //   .then(() => {
 //     const newNote = {

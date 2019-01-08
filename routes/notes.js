@@ -53,9 +53,23 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser:true })
 
 /* ========== POST/CREATE AN ITEM ========== */
 router.post('/', (req, res, next) => {
-
+  const newNote = req.body;
   console.log('Create a Note');
-  res.location('path/to/new/document').status(201).json({ id: 2, title: 'Temp 2' });
+  //CREATE A DOCUMENT
+  mongoose.connect(MONGODB_URI, { useNewUrlParser:true })
+  .then(() => {
+    return Note.create(newNote);
+  })
+  .then(results => {
+    res.json(results);
+  })
+  .then(() => {
+    return mongoose.disconnect()
+  })
+  .catch(err => {
+    console.error(`ERROR: ${err.message}`);
+    console.error(err);
+  });
 
 });
 
