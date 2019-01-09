@@ -8,92 +8,107 @@ const Note = require('../models/note');
 
 /* ========== GET/READ ALL ITEMS ========== */
 router.get('/', (req, res, next) => {
-  const searchTerm = req.query.searchTerm;
+  const { searchTerm } = req.query;
   let filter = {};
-  console.log('Get All Notes');
-  mongoose.connect(MONGODB_URI, { useNewUrlParser:true })
-  .then(() => {
-    if (searchTerm) {
-      filter.title = { $regex: searchTerm, $options: 'i' };
+  
+  if (searchTerm) {
+      // filter.title = { 
+      //   $regex: searchTerm, 
+      //   $options: 'i' };
+      
+      const re = new RegExp(searchTerm, 'i');
+      filter.$or = [{ 'title': re }, { 'content': re }];
     }
-    return Note.find(filter).sort({ updatedAt: 'desc' });
-  })
-  .then(results => {
-    res.json(results);
-  })
-  .then(() => {
-    return mongoose.disconnect()
-  })
+
+  Note.find(filter)
+    .sort({ updatedAt: 'desc' })
+    .then(results => {
+      if (results) {  
+          res.json(results);
+        } else { 
+          next();
+        }
+    })
   .catch(err => {
     console.error(`ERROR: ${err.message}`);
     console.error(err);
   });
-
 });
 
 /* ========== GET/READ A SINGLE ITEM ========== */
 router.get('/:id', (req, res, next) => {
-const searchId = req.params.id;
-mongoose.connect(MONGODB_URI, { useNewUrlParser:true })
-.then(() => {
-  return Note.findById(searchId);
-})
+const { id } = req.params;
+Note.findById(id)
 .then(results => {
-  res.json(results);
-})
-.then(() => {
-  return mongoose.disconnect()
+  if (results) {  
+    res.json(results);
+  } else { 
+    next();
+  }
 })
 .catch(err => {
   console.error(`ERROR: ${err.message}`);
   console.error(err);
 });
-
 });
+
 
 /* ========== POST/CREATE AN ITEM ========== */
 router.post('/', (req, res, next) => {
-  const newNote = req.body;
+  const {title, content } = req.body;
   console.log('Create a Note');
   //CREATE A DOCUMENT
-  mongoose.connect(MONGODB_URI, { useNewUrlParser:true })
-  .then(() => {
-    return Note.create(newNote);
-  })
-  .then(results => {
-    res.json(results);
-  })
-  .then(() => {
-    return mongoose.disconnect()
+
+  if (!title) {
+    const err = new Error('Missing `title` in request body');
+    err.status = 400;
+    return next(err);
+  }
+
+  const newNote = {title, content};
+
+  Note.create(newNote)
+  .then(result => {
+    res.location(`${req.originalUrl}/${result.id}`)
+      .status(201)
+      .json(result);
   })
   .catch(err => {
-    console.error(`ERROR: ${err.message}`);
-    console.error(err);
+    next(err);
   });
-
 });
 
 /* ========== PUT/UPDATE A SINGLE ITEM ========== */
 router.put('/:id', (req, res, next) => {
-  const updateId = req.params.id;
-  const newData = req.body;
+  const { id } = req.params;
+  const { title, content } = req.body;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    const err = new Error('The `id` is not valid');
+    err.status = 400;
+    return next(err);
+  }
+
+  if (!title) {
+    const err = new Error('Missing `title` in request body');
+    err.status = 400;
+    return next(err);
+  }
+
+  const updateNote = { title, content};
+
   console.log('Update a Note');
   // UPDATE NOTE BY ID
-  mongoose.connect(MONGODB_URI, { useNewUrlParser:true })
-  .then(() => {
-    return Note.findByIdAndUpdate(updateId, 
-      newData,
-      {upsert: true, new: true});
-  })
-  .then(results => {
-    res.json(results);
-  })
-  .then(() => {
-    return mongoose.disconnect()
+  Note.findByIdAndUpdate(id, updateNote, { new: true })
+  .then(result => {
+    if (result) {
+      res.json(result);
+    } else {
+      next();
+    }
   })
   .catch(err => {
-    console.error(`ERROR: ${err.message}`);
-    console.error(err);
+    next(err);
   });
 });
 
@@ -101,22 +116,21 @@ router.put('/:id', (req, res, next) => {
 router.delete('/:id', (req, res, next) => {
 
   console.log('Delete a Note');
-  const deleteId = req.params.id;
+  const { id } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    const err = new Error('The `id` is not valid');
+    err.status = 400;
+    return next(err);
+  }
 
   // DELETE NOTE BY ID
-  mongoose.connect(MONGODB_URI, { useNewUrlParser:true })
-  .then(() => {
-    return Note.findByIdAndRemove(deleteId);
-  })
-  .then(results => {
-    res.json(results);
-  })
-  .then(() => {
-    return mongoose.disconnect()
+   Note.findByIdAndRemove(id)
+   .then(() => {
+    res.status(204).end();
   })
   .catch(err => {
-    console.error(`ERROR: ${err.message}`);
-    console.error(err);
+    next(err);
   });
 });
 
