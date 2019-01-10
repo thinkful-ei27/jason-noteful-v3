@@ -31,7 +31,6 @@ describe('Noteful test API', function() {
 
     after(function () {
         return mongoose.disconnect();
-        
     });
 
     describe('GET /api/notes', function () {
