@@ -75,6 +75,40 @@ router.post('/', (req, res, next) => {
             .json(result);
     })
     .catch(err => {
+        if (err.code === 11000) {
+            err = new Error('The folder name already exists');
+            err.status=400;
+        }
+        next(err);
+    });
+});
+
+/* ========== PUT/UPDATE A SINGLE ITEM ========== */
+router.put('/:id', (req, res, next) => {
+    const { id } = req.params;
+    const { name } = req.body;
+
+    if (!mongooose.Types.ObjectId.isValid(id)) {
+        const err = new Error('The `id` is not valid');
+        err.status = 400;
+        return next(err);
+    }
+
+    const updateFolder = { name };
+
+    Folder.findByIdAndUpdate(id, updateFolder, { new: true })
+    .then(result => {
+        if (result) {
+            res.json(result);
+        } else {
+            next();
+        }
+    })
+    .catch(err => {
+        if (err.code === 11000) {
+            err = new Error('The folder name already exists');
+            err.status=400;
+        }
         next(err);
     });
 });

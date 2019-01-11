@@ -70,7 +70,11 @@ router.post('/', (req, res, next) => {
       .json(result);
   })
   .catch(err => {
-    next(err);
+   if (err.code === 11000) {
+     err = new Error('The foldernamealready  exists');
+     err.status=400;
+   }
+     next(err);
   });
 });
 
@@ -104,7 +108,11 @@ router.put('/:id', (req, res, next) => {
     }
   })
   .catch(err => {
-    next(err);
+   if (err.code === 11000) {
+     err = new Error('The note name already  exists');
+     err.status=400;
+   }
+     next(err);
   });
 });
 
