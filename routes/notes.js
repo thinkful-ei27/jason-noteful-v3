@@ -116,7 +116,6 @@ router.put('/:id', (req, res, next) => {
   });
 });
 
-/* ========== DELETE/REMOVE A SINGLE ITEM ========== */
 router.delete('/:id', (req, res, next) => {
 
   console.log('Delete a Note');
