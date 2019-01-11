@@ -9,12 +9,18 @@ const Note = require('../models/note');
 /* ========== GET/READ ALL ITEMS ========== */
 router.get('/', (req, res, next) => {
   const { searchTerm } = req.query;
+
+  const { folderId } = req.query;
   let filter = {};
   
   if (searchTerm) {
       const re = new RegExp(searchTerm, 'i');
       filter.$or = [{ 'title': re }, { 'content': re }];
     }
+
+  if (folderId) {
+    filter = {'folderId': folderId };
+  }
 
   Note.find(filter)
     .sort({ updatedAt: 'desc' })
@@ -51,7 +57,7 @@ Note.findById(id)
 
 /* ========== POST/CREATE AN ITEM ========== */
 router.post('/', (req, res, next) => {
-  const {title, content } = req.body;
+  const {title, content, folderId } = req.body;
   console.log('Create a Note');
   //CREATE A DOCUMENT
 
@@ -61,7 +67,7 @@ router.post('/', (req, res, next) => {
     return next(err);
   }
 
-  const newNote = {title, content};
+  const newNote = {title, content, folderId};
 
   Note.create(newNote)
   .then(result => {
@@ -81,7 +87,7 @@ router.post('/', (req, res, next) => {
 /* ========== PUT/UPDATE A SINGLE ITEM ========== */
 router.put('/:id', (req, res, next) => {
   const { id } = req.params;
-  const { title, content } = req.body;
+  const { title, content, folderId } = req.body;
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
     const err = new Error('The `id` is not valid');
@@ -95,7 +101,7 @@ router.put('/:id', (req, res, next) => {
     return next(err);
   }
 
-  const updateNote = { title, content };
+  const updateNote = { title, content, folderId };
 
   console.log('Update a Note');
   // UPDATE NOTE BY ID

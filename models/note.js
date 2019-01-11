@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const noteSchema = new mongoose.Schema({
   title: {
       type: String, required: true},
-  content: String,
+  content: {type: String},
   folderId: {
       type: mongoose.Schema.Types.ObjectId, ref: 'Folder'
     }
@@ -19,6 +19,5 @@ noteSchema.set('toJSON', {
       delete ret.__v;
     }
   });
-
 
 module.exports = mongoose.model('Note', noteSchema);
