@@ -67,6 +67,12 @@ router.post('/', (req, res, next) => {
     return next(err);
   }
 
+  if (!mongoose.Types.ObjectId.isValid(folderId)) {
+    const err = new Error('The `folder id` is not valid');
+    err.status = 400;
+    return next(err);
+  }
+
   const newNote = {title, content, folderId};
 
   Note.create(newNote)
@@ -77,7 +83,7 @@ router.post('/', (req, res, next) => {
   })
   .catch(err => {
    if (err.code === 11000) {
-     err = new Error('The foldernamealready  exists');
+     err = new Error('That name already exists');
      err.status=400;
    }
      next(err);
