@@ -7,6 +7,8 @@ const app = require('../server');
 const { TEST_MONGODB_URI } = require('../config');
 const Note = require('../models/note');
 const { notes } = require('../db/data');
+const Folder = require('../models/folder');
+const { folders } = require('../db/data');
 const expect = chai.expect;
 chai.use(chaiHttp);
 
@@ -17,7 +19,10 @@ describe('Noteful test API', function() {
     });
 
     beforeEach(function () {
-        return Note.insertMany(notes);
+        return Promise.all([
+            Note.insertMany(notes),
+            Folder.insertMany(folders)
+        ]);
     });
 
     afterEach(function () {
@@ -49,7 +54,7 @@ describe('Noteful test API', function() {
     describe('GET /api/notes/:id', function () {
         it('should return correct note', function () {
             let data;
-            // first, call teh database
+            // first, call the database
             return Note.findOne()
                 .then(_data => {
                     data = _data;
@@ -61,12 +66,13 @@ describe('Noteful test API', function() {
                     expect(res).to.be.json;
 
                     expect(res.body).to.be.an('object');
-                    expect(res.body).to.have.keys('id', 'title', 'content', 'createdAt', 'updatedAt');
+                    expect(res.body).to.have.keys('id', 'title', 'content', 'folderId', 'createdAt', 'updatedAt');
           
                     // third compare database results to API response
                     expect(res.body.id).to.equal(data.id);
                     expect(res.body.title).to.equal(data.title);
                     expect(res.body.content).to.equal(data.content);
+                    expect(res.body.folderId).to.equal(data.folderId);
                     expect(new Date(res.body.createdAt)).to.eql(data.createdAt);
                     expect(new Date(res.body.updatedAt)).to.eql(data.updatedAt);
                 });
@@ -77,7 +83,8 @@ describe('Noteful test API', function() {
         it('should create and return a new item when provided valid data', function (){
             const newItem = {
                 'title': 'The best article about cats ever!',
-                'content': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor...'
+                'content': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor...',
+                'folderId': '101111111111111111111100'
               };
 
             let res;
@@ -91,7 +98,7 @@ describe('Noteful test API', function() {
                 expect(res).to.have.header('location');
                 expect(res).to.be.json;
                 expect(res.body).to.be.a('object');
-                expect(res.body).to.have.keys('id', 'title', 'content', 'createdAt', 'updatedAt');
+                expect(res.body).to.have.keys('id', 'title', 'content', 'folderId', 'createdAt', 'updatedAt');
                 // second call the database
                 return Note.findById(res.body.id);
                 })
@@ -100,6 +107,7 @@ describe('Noteful test API', function() {
                     expect(res.body.id).to.equal(data.id);
                     expect(res.body.title).to.equal(data.title);
                     expect(res.body.content).to.equal(data.content);
+                    expect(res.body.folderId).to.equal(data.folderId);
                     expect(new Date(res.body.createdAt)).to.eql(data.createdAt);
                     expect(new Date(res.body.updatedAt)).to.eql(data.updatedAt);
               });
@@ -110,7 +118,8 @@ describe('Noteful test API', function() {
        it('should put and update file when given valid data', function () {
         const updateItem = {
             'title': 'The best bob!',
-            'content': 'Bob Lorem bob ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor...'
+            'content': 'Bob Lorem bob ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor...',
+            'folderId': '101111111111111111111103'
           };
 
           let res;
@@ -131,6 +140,7 @@ describe('Noteful test API', function() {
             .then(function(note) {
                 expect(note.title).to.equal(updateItem.title);
                 expect(note.content).to.equal(updateItem.content);
+                expect(note.folderId).to.equal(updateItem.folderId);
             });
         });
 
