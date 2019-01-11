@@ -12,10 +12,6 @@ router.get('/', (req, res, next) => {
   let filter = {};
   
   if (searchTerm) {
-      // filter.title = { 
-      //   $regex: searchTerm, 
-      //   $options: 'i' };
-      
       const re = new RegExp(searchTerm, 'i');
       filter.$or = [{ 'title': re }, { 'content': re }];
     }
@@ -95,7 +91,7 @@ router.put('/:id', (req, res, next) => {
     return next(err);
   }
 
-  const updateNote = { title, content};
+  const updateNote = { title, content };
 
   console.log('Update a Note');
   // UPDATE NOTE BY ID
