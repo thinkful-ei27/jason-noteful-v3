@@ -12,9 +12,9 @@ const { folders } = require('../db/data');
 const expect = chai.expect;
 chai.use(chaiHttp);
 
-describe('Noteful test API', function() {
+describe('Noteful test API notes', function() {
     before(function () {
-        return mongoose.connect(TEST_MONGODB_URI)
+        return mongoose.connect(TEST_MONGODB_URI, { useNewUrlParser: true })
             .then(()=> mongoose.connection.db.dropDatabase());
     });
 
@@ -42,13 +42,37 @@ describe('Noteful test API', function() {
             chai.request(app).get('/api/notes')
           ])
           // 3) then compare database results to API response
+        .then(([data, res]) => {
+          expect(res).to.have.status(200);
+          expect(res).to.be.json;
+          expect(res.body).to.be.an('array');
+          expect(res.body).to.have.lengt(data.length);
+        });
+        });
+
+        it('should return list with the correct fields', function() {
+            return Promise.all([
+                Note.find().sort({ updatedAt: 'desc'}),
+                chai.request(app).get('/api/notes')
+            ])
             .then(([data, res]) => {
-              expect(res).to.have.status(200);
-              expect(res).to.be.json;
-              expect(res.body).to.be.a('array');
-              expect(res.body).to.have.length(data.length);
+                expect(res).to.have.status(200);
+                expect(res).to.be.json;
+                expect(res.body).to.be.an('array');
+                expect(res.body).to.have.length(data.length);
+                res.body.forEach(function (item, i) {
+                    expect(item).to.be.an('object');
+                    expect(item).to.include.all.keys('id', 'title', 'folderId','createdAt', 'updatedAt');
+                    expect(item.id).to.equal(data[i].id);
+                    expect(item.title).to.equal(data[i].title);
+                    expect(item.content).to.equal(data[i].content);
+                    expect(item.folderId).to.equal(data.folderId);
+                    expect(new Date(item.createdAt)).to.deep.equal(data[i].createdAt);
+                    expect(new Date(item.updatedAt)).to.deep.equal(data[i].updatedAt);
+                });
             });
         });
+
       });
 
     describe('GET /api/notes/:id', function () {
@@ -64,7 +88,6 @@ describe('Noteful test API', function() {
                 .then((res) => {
                     expect(res).to.have.status(200);
                     expect(res).to.be.json;
-
                     expect(res.body).to.be.an('object');
                     expect(res.body).to.have.keys('id', 'title', 'content', 'folderId', 'createdAt', 'updatedAt');
           
