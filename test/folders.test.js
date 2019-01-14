@@ -33,10 +33,13 @@ describe('Noteful test API folders', function() {
 
     describe('GET /api/folders', function () {
         it('should return the correct number of Folders', function () {
+            // 1) Call the database **and** the API
+            // 2) Wait for both promises to resolve using `Promise.all`
             return Promise.all([
                 Folder.find(),
                 chai.request(app).get('/api/folders')
             ])
+            // 3) then compare database results to API response
             .then(([data, res]) => {
                 expect(res).to.have.status(200);
                 expect(res).to.be.json;
@@ -44,14 +47,38 @@ describe('Noteful test API folders', function() {
                 expect(res.body).to.have.length(data.length);
             });
         });
+
+        it('should return list with the correct fields', function () {
+             return Promise.all([
+                 Folder.find(),
+                 chai.request(app).get('/api/notes')
+             ])
+             .then(([data, res]) => {
+                 expect(res).to.have.status(200);
+                 expect(res).to.be.json;
+                 expect(res.body).to.be.an('array');
+                 expect(res.body).to.have.length(data.length);
+                 res.body.forEach(function (item, i) {
+                     expect(item).to.be.an('object');
+                     expect(item).to.include.all.keys('id','name','createdAt','updatedAt');
+                     expect(item.id).to.equal(data[i].id);
+                     expect(item.name).to.equal(data[i].name);
+                     expect(new Date(item.createdAt)).to.deep.equal(data[i].createdAt);
+                     expect(new Date(item.updatedAt)).to.deep.equal(data[i].updatedAt);
+                 });
+             });
+         });
+
     });
 
     describe('GET /api/folders/:id', function () {
         it('should return the correct folder', function () {
             let data;
+            // first, call the database
             return Folder.findOne()
             .then(_data => {
                 data = _data;
+                // second, call the API with the ID
                 return chai.request(app).get(`/api/folders/${data.id}`);
             })
             .then((res) => {
@@ -59,6 +86,8 @@ describe('Noteful test API folders', function() {
                 expect(res).to.be.json;
                 expect(res.body).to.be.an('object');
                 expect(res.body).to.have.keys('id','name','createdAt','updatedAt');
+
+                // third compare database results to API response
                 expect(res.body.id).to.equal(data.id);
                 expect(res.body.name).to.equal(data.name);
                 expect(res.body.createdAt).to.equal(data.createdAt);

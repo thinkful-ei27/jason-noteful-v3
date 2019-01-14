@@ -35,24 +35,24 @@ describe('Noteful test API notes', function() {
 
     describe('GET /api/notes', function () {
         it('should return the correct number of Notes', function () {
-        // 1) Call the database **and** the API
-        // 2) Wait for both promises to resolve using `Promise.all`
-        return Promise.all([
-            Note.find(),
-            chai.request(app).get('/api/notes')
-          ])
-          // 3) then compare database results to API response
-        .then(([data, res]) => {
-          expect(res).to.have.status(200);
-          expect(res).to.be.json;
-          expect(res.body).to.be.an('array');
-          expect(res.body).to.have.lengt(data.length);
-        });
+            // 1) Call the database **and** the API
+            // 2) Wait for both promises to resolve using `Promise.all`
+            return Promise.all([
+                Note.find(),
+                chai.request(app).get('/api/notes')
+            ])
+            // 3) then compare database results to API response
+            .then(([data, res]) => {
+                expect(res).to.have.status(200);
+                expect(res).to.be.json;
+                expect(res.body).to.be.an('array');
+                expect(res.body).to.have.length(data.length);
+            });
         });
 
         it('should return list with the correct fields', function() {
             return Promise.all([
-                Note.find().sort({ updatedAt: 'desc'}),
+                Note.find(),
                 chai.request(app).get('/api/notes')
             ])
             .then(([data, res]) => {
@@ -73,7 +73,7 @@ describe('Noteful test API notes', function() {
             });
         });
 
-      });
+    });
 
     describe('GET /api/notes/:id', function () {
         it('should return correct note', function () {
