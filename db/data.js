@@ -95,4 +95,4 @@ const tags = [
   }
 ]
 
-module.exports = { folders, notes };
+module.exports = { folders, notes, tags };
